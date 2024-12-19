@@ -53,7 +53,7 @@ This project trains a GPT-2-level large language model (LLM) from scratch, allow
     ```
 
 ## Important Parameters
-Modify these in the scripts (train_gpt_txt.py / train_gpt_wiki.py) as needed:
+Modify these in the scripts (`train_gpt_txt.py` / `train_gpt_wiki.py`) as needed:
 ```
 DEVICE_NAME = None       # 'cpu', 'mps', 'cuda'; if None, best device is auto-selected
 TRAIN_RATIO = 0.9        # Fraction of data for training; remainder for validation
