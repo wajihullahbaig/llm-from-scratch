@@ -1,7 +1,10 @@
 # GPT-Style Language Model from Scratch
-![Model Training Output](output.webp)
 
-This project trains a GPT-2-level large language model (LLM) from scratch, allowing you to explore how modern LLMs are built and trained. By experimenting with smaller or larger models, as well as small (public-domain text) or large (English Wikipedia) datasets, you can better understand the inner workings and trade-offs involved in training such models.
+<div align="center">
+<img src="output.webp" alt="Model Training Output" width="500">
+
+</div>
+ This project trains a GPT-2-level large language model (LLM) from scratch, allowing you to explore how modern LLMs are built and trained. By experimenting with smaller or larger models, as well as small (public-domain text) or large (English Wikipedia) datasets, you can better understand the inner workings and trade-offs involved in training such models.
 
 ## Key Features
 
