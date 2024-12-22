@@ -23,12 +23,12 @@ inference:
 
 # Model Architecture Configurations
 model_configs: # 355M parameter configuration
-    vocab_size: 50257   # Vocabulary size
-    context_length: 1024 # Context length
-    emb_dim: 1024       # Embedding dimension
-    n_heads: 16         # Number of attention heads
-    n_layers: 24        # Number of layers
-    drop_rate: 0.1      # Dropout rate
-    qkv_bias: false     # Query-key-value bias
-    # Note: For this model, use batch size <= 4 for GPU training
-    # Locally use batch size 1-2, but will take longer to train
+  vocab_size: 50257   # Vocabulary size
+  context_length: 1024 # Context length
+  emb_dim: 1024       # Embedding dimension
+  n_heads: 16         # Number of attention heads
+  n_layers: 24        # Number of layers
+  drop_rate: 0.1      # Dropout rate
+  qkv_bias: false     # Query-key-value bias
+  # Note: For this model, use batch size <= 4 for GPU training
+  # Locally use batch size 1-2, but will take longer to train
