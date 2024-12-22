@@ -19,7 +19,7 @@ class ConfigurationManager:
     
     # Default validation rules for GPT configuration
     GPT_VALIDATION_RULES = {
-        "model.gpt_config": {
+        "model_configs": {
             "vocab_size": lambda x: isinstance(x, int) and x > 0,
             "context_length": lambda x: isinstance(x, int) and x > 0,
             "emb_dim": lambda x: isinstance(x, int) and x > 0,
@@ -28,7 +28,7 @@ class ConfigurationManager:
             "drop_rate": lambda x: isinstance(x, float) and 0 <= x <= 1,
             "qkv_bias": lambda x: isinstance(x, bool)
         },
-        "model.training": {
+        "training": {
             "train_ratio": lambda x: isinstance(x, float) and 0 < x < 1,
             "num_epochs": lambda x: isinstance(x, int) and x > 0,
             "batch_size": lambda x: isinstance(x, int) and x > 0,
@@ -199,3 +199,29 @@ class ConfigurationManager:
         self.logger.info("Current Configuration Settings:")
         _print_dict(self.config)
 
+	# Example usage:
+if __name__ == "__main__":
+    # Example: Create a custom logger
+    custom_logger = logging.getLogger("CustomLogger")
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - CUSTOM - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    custom_logger.addHandler(handler)
+    custom_logger.setLevel(logging.INFO)
+    
+    # Create configuration manager with custom logger
+    config_manager = ConfigurationManager(
+        config_path='gpt2_124m_config.yaml',
+        logger=custom_logger
+    )
+    
+    # Example: Create configuration manager with default logger
+    default_config_manager = ConfigurationManager(
+        config_path='gpt2_355m_config.yaml'
+    )
+    
+    # Test configuration validation
+    config_manager.validate_gpt_config()
+    
+    # Print settings using custom logger
+    config_manager.print_settings()

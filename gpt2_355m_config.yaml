@@ -4,7 +4,7 @@
 model:
   save_path: "gpt-model-wiki-2.pt"
   device: null  # cpu, mps or cuda. If None, will select the best available one
-  model_type: "GPT_CONFIG_124M"  # Options: GPT_CONFIG_124M, GPT_CONFIG_355M
+  model_type: "GPT_CONFIG_355M"  
 
 # Training configuration
 training:
@@ -22,17 +22,7 @@ inference:
   temperature: 1.2
 
 # Model Architecture Configurations
-model_configs:
-  gpt_124m:  # 124M parameter configuration
-    vocab_size: 50257   # Vocabulary size
-    context_length: 256 # Shortened context length (orig: 1024)
-    emb_dim: 768       # Embedding dimension
-    n_heads: 12        # Number of attention heads
-    n_layers: 12       # Number of layers
-    drop_rate: 0.1     # Dropout rate
-    qkv_bias: false    # Query-key-value bias
-
-  gpt_355m:  # 355M parameter configuration
+model_configs: # 355M parameter configuration
     vocab_size: 50257   # Vocabulary size
     context_length: 1024 # Context length
     emb_dim: 1024       # Embedding dimension
