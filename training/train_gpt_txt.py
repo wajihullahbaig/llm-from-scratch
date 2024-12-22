@@ -1,21 +1,22 @@
 # This file trains a GPT model on a small txt dataset ("Alice in Wonderland" novel). Good fors trying out locally.
+import os
 import torch
 import time
 import tiktoken
 import logging 
 import sys
 
-
 from data.dataset_processors import DataLoaderConfig, DatasetProcessor
 from utils.misc import print_lib_versions, set_device
+from utils.model_summary import print_model_summary
 from utils.models import GPTModel, save_model
 from utils.plot import plot_losses
 from utils.eval import calc_loss_loader, generate_and_print_sample
 from training.trainer import train_model_simple, train_model_advanced
 from utils.seeding import set_seed
-
 from configs.configuration_manager import ConfigurationManager
 from data.downloaders import CorpusDownloader
+from models.gpt2_model import GPTModel
 
 def main():
     set_seed(42)
@@ -81,7 +82,7 @@ def main():
         return
 
     if total_tokens * (1-llm_configs.get_setting("training.test_train_ratio")) <  llm_configs.get_setting("model_configs.context_length"):
-        logger.info("\nNot enough tokens for the validation loader. "
+        logger.info("Not enough tokens for the validation loader. "
             "Try to lower the 'context_length' or "
             "decrease the `training_ratio`")
         return
@@ -130,12 +131,12 @@ def main():
     for input_batch, target_batch in val_loader:
         val_tokens += input_batch.numel()
 
-    logger.info(f"\nTraining tokens:    {train_tokens:,}")
+    logger.info(f"Training tokens:    {train_tokens:,}")
     logger.info(f"Validation tokens:  {val_tokens:,}")
     logger.info(f"All tokens:         {train_tokens + val_tokens:,}")
 
     # Selecting device
-    logger.info(f"\n{50 * '='}")
+    logger.info(f"{50 * '='}")
     logger.info("\t\tSELECTING DEVICE AND MODEL")
     logger.info(f"{50 * '='}")
 
@@ -143,89 +144,92 @@ def main():
     logger.info(f"Device: {device}")
     logger.info(f"Model used: {llm_configs.get_setting('model.model_type')}")
 
-    # # Testing the initial model (before it is trained). It may take some time.
-    # if llm_configs.get_setting('training.test_before_training'):
-    #     logger.info(f"{50 * '='}")
-    #     logger.info("\t\tINITIAL MODEL TESTING")
-    #     logger.info(f"{50 * '='}")
+    # Testing the initial model (before it is trained). It may take some time.
+    if llm_configs.get_setting('training.test_before_training'):
+        logger.info(f"{50 * '='}")
+        logger.info("\t\tINITIAL MODEL TESTING")
+        logger.info(f"{50 * '='}")
 
-    #     torch.manual_seed(123) # For reproducibility
-    #     start_time_model = time.time()
+        start_time_model = time.time()
 
-    #     model = GPTModel(llm_configs.get_setting('model.model_type'))
-    #     model.eval();  # Disable dropout during inference
-    #     model.to(device)
-    #     logger.info(f"Model to device completed in {(time.time() - start_time_model) / 60:.2f} minutes.")
+        model = GPTModel(llm_configs)
+        print_model_summary(llm_configs, logger, model)
+        model.eval();  # Disable dropout during inference
+        model.to(device)
+        logger.info(f"Model to device completed in {(time.time() - start_time_model) / 60:.2f} minutes.")
 
-    #     # Calculating training and validation loss
-    #     start_time_model = time.time()
-    #     with torch.no_grad(): # Disable gradient tracking for efficiency because we are not training, yet
-    #         train_loss = calc_loss_loader(train_loader, model, device)
-    #         val_loss = calc_loss_loader(val_loader, model, device)
-    #     logger.info(f"Model eval completed in {(time.time() - start_time_model) / 60:.2f} minutes.")
-    #     logger.info("Training loss:", train_loss)
-    #     logger.info("Validation loss:", val_loss)
+        # Calculating training and validation loss
+        start_time_model = time.time()
+        with torch.no_grad(): # Disable gradient tracking for efficiency because we are not training, yet
+            train_loss = calc_loss_loader(train_loader, model, device)
+            val_loss = calc_loss_loader(val_loader, model, device)
+        logger.info(f"Model eval completed in {(time.time() - start_time_model) / 60:.2f} minutes.")
+        logger.info(f"Training loss: {train_loss}")
+        logger.info(f"Validation loss: { val_loss}")
 
-    #     # Checking initial model output
-    #     logger.info("\nModel output before training:")
-    #     generate_and_print_sample(
-    #         model, tokenizer, device, llm_configs.get_setting('inference.start_context'), llm_configs.get_setting('inference.temperature')
-    #     )
+        # Checking initial model output
+        logger.info("Model output before training:")
+        generate_and_print_sample(
+            model, tokenizer, device, llm_configs.get_setting('inference.start_context'), llm_configs.get_setting('inference.temperature')
+        )
 
     
-    # logger.info(f"\n{50 * '='}")
-    # logger.info("\t\tSTART TRAINING")
-    # logger.info(f"{50 * '='}")
+    logger.info(f"{50 * '='}")
+    logger.info("\t\tSTART TRAINING")
+    logger.info(f"{50 * '='}")
 
-    # # Initializing an empty GPT model (with random weights)
-    # model = GPTModel(llm_configs.get_setting('model.model_type'))
-    # model.to(device)
+    # Initializing an empty GPT model (with random weights)
+    model = GPTModel(llm_configs)
+    model.to(device)
 
-    # # Creating optimizer
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.1)
+    # Creating optimizer
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.1)
 
-    # # Double checking that the model is on the right device
-    # print(f"Model located on device: {next(model.parameters()).device}\n")
+    # Double checking that the model is on the right device
+    logger.info(f"Model located on device: {next(model.parameters()).device}\n")
 
-    # # Starting the time counter
-    # start_time = time.time()
+    # Starting the time counter
+    start_time = time.time()
 
-    # if llm_configs.get_setting('training.advanced_training'):
-    #     # Training with advanced techniques like learning rate warmup, cosine decay and gradient clipping.
-    #     total_steps = len(train_loader) * llm_configs.get_setting('training.advanced_training')
-    #     warmup_steps = int(0.2 * total_steps) # 20% warmup
+    if llm_configs.get_setting('training.advanced_training'):
+        # Training with advanced techniques like learning rate warmup, cosine decay and gradient clipping.
+        total_steps = len(train_loader) * llm_configs.get_setting('training.num_epochs')
+        warmup_steps = int(0.2 * total_steps) # 20% warmup
         
-    #     train_losses, val_losses, tokens_seen, lrs = train_model_advanced(
-    #         model, train_loader, val_loader, 
-    #         optimizer, device, n_epochs=llm_configs.get_setting('training.num_epochs'),
-    #         eval_freq=5, 
-    #         eval_iter=1, 
-    #         start_context=llm_configs.get_setting('inference.start_context'),
-    #         tokenizer=tokenizer, warmup_steps=warmup_steps, 
-    #         initial_lr=1e-5, min_lr=1e-5, temperature= llm_configs.get_setting('inference.temperature')
-    #     )
-    # else:
-    #     # Training in a more simple way (without learning rate warmup, cosine decay and gradient clipping).
-    #     train_losses, val_losses, tokens_seen = train_model_simple(
-    #         model, train_loader, val_loader, optimizer, device,
-    #         num_epochs=llm_configs.get_setting('training.num_epochs'), 
-    #         eval_freq=5, 
-    #         eval_iter=5,
-    #         start_context=llm_configs.get_setting('inference.start_context'), 
-    #         tokenizer=tokenizer, 
-    #         temperature= llm_configs.get_setting('inference.temperature')
-    #     )
+        train_losses, val_losses, tokens_seen, lrs = train_model_advanced(
+            model, train_loader, val_loader, 
+            optimizer, device, n_epochs=llm_configs.get_setting('training.num_epochs'),
+            eval_freq=5, 
+            eval_iter=1, 
+            start_context=llm_configs.get_setting('inference.start_context'),
+            tokenizer=tokenizer, warmup_steps=warmup_steps, 
+            initial_lr=1e-8, min_lr=1e-5, temperature= llm_configs.get_setting('inference.temperature')
+        )
+    else:
+        # Training in a more simple way (without learning rate warmup, cosine decay and gradient clipping).
+        train_losses, val_losses, tokens_seen = train_model_simple(
+            model, train_loader, val_loader, optimizer, device,
+            num_epochs=llm_configs.get_setting('training.num_epochs'), 
+            eval_freq=5, 
+            eval_iter=5,
+            start_context=llm_configs.get_setting('inference.start_context'), 
+            tokenizer=tokenizer, 
+            temperature= llm_configs.get_setting('inference.temperature')
+        )
 
-    # # Printing time it took to train
-    # end_time = time.time()
-    # execution_time_minutes = (end_time - start_time) / 60
-    # logger.info(f"\n\nTraining completed in {execution_time_minutes:.2f} minutes.")
+    # Printing time it took to train
+    end_time = time.time()
+    execution_time_minutes = (end_time - start_time) / 60
+    logger.info(f"Training completed in {execution_time_minutes:.2f} minutes.")
 
-    # # Plottong train and val losses per epoch
-    # plot_losses(llm_configs.get_setting('training.num_epochs'), tokens_seen, train_losses, val_losses)
+    # Plottong train and val losses per epoch
+    plot_losses(llm_configs.get_setting('training.num_epochs'), tokens_seen, train_losses, val_losses)
 
-    # # Save the trained model (for furture reuse)
-    # save_model(llm_configs.get_setting('model.save_path'), model, optimizer, train_losses, val_losses, llm_configs.get_setting('model.model_type'), llm_configs.get_setting('training.num_epochs'))
+    # Save the trained model (for furture reuse)
+    base_path = os.path.join(llm_configs.get_setting('model.output_dir'),llm_configs.get_setting('model.model_type') )
+    os.makedirs(base_path, exist_ok=True)
+    full_path = os.path.join(base_path, llm_configs.get_setting('model.save_name'))
+    save_model(full_path, model, optimizer, train_losses, val_losses, llm_configs.get_setting('model.model_type'), llm_configs.get_setting('training.num_epochs'),logger)
 
 if __name__ == "__main__":
     main()

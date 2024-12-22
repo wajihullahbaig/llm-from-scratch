@@ -1,4 +1,5 @@
 # Implementation of the GPT model and it's components
+from logging import Logger
 import torch
 import torch.nn as nn
 
@@ -180,7 +181,7 @@ def generate_text_simple(model, idx, max_new_tokens, context_size, temperature=1
 
     return idx
 
-def save_model(model_save_path, model, optimizer, train_losses, val_losses, config, num_epochs):
+def save_model(model_save_path, model, optimizer, train_losses, val_losses, config, num_epochs, logger:Logger):
     torch.save({
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
@@ -189,7 +190,7 @@ def save_model(model_save_path, model, optimizer, train_losses, val_losses, conf
         'config': config,
         'epochs': num_epochs
     }, model_save_path)
-    print(f"\nModel saved to {model_save_path}")
+    logger.info(f"\nModel saved to {model_save_path}")
 
 def load_model(model_path):
     # Load the saved model checkpoint

@@ -23,5 +23,5 @@ def plot_losses(num_epochs, tokens_seen, train_losses, val_losses):
     ax2.set_xlabel("Tokens seen")
 
     fig.tight_layout()  # Adjust layout to make room
-    plt.savefig("loss-plot.pdf")
+    plt.savefig("outputs/loss-plot.pdf")
     plt.show()

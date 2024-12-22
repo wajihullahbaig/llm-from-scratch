@@ -43,7 +43,7 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
 # This version of training includes learning rate warmup, cosine decay and gradient clipping
 def train_model_advanced(model, train_loader, val_loader, optimizer, device,
                 n_epochs, eval_freq, eval_iter, start_context, tokenizer,
-                warmup_steps, initial_lr=3e-05, min_lr=1e-6, temperature=1.0):
+                warmup_steps=1.0, initial_lr=3e-05, min_lr=1e-6, temperature=1.0):
 
     train_losses, val_losses, track_tokens_seen, track_lrs = [], [], [], []
     tokens_seen, global_step = 0, -1

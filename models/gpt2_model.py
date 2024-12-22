@@ -1,6 +1,8 @@
 # Implementation of the GPT model and it's components
 import torch
 import torch.nn as nn
+from torchinfo import summary
+from configs.configuration_manager import ConfigurationManager
 
 # Multi-head attention block (with key, query, value vectors). By default without biases, just weights.
 class MultiHeadAttention(nn.Module):
@@ -84,12 +86,12 @@ class GELU(nn.Module):
 
 
 class FeedForward(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg:ConfigurationManager):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(cfg["emb_dim"], 4 * cfg["emb_dim"]),
+            nn.Linear(cfg.get_setting("model_configs.emb_dim"), 4 * cfg.get_setting("model_configs.emb_dim")),
             GELU(),
-            nn.Linear(4 * cfg["emb_dim"], cfg["emb_dim"]),
+            nn.Linear(4 * cfg.get_setting("model_configs.emb_dim"), cfg.get_setting("model_configs.emb_dim")),
         )
 
     def forward(self, x):
@@ -97,19 +99,19 @@ class FeedForward(nn.Module):
 
 
 class TransformerBlock(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg:ConfigurationManager):
         super().__init__()
         self.att = MultiHeadAttention(
-            d_in=cfg["emb_dim"],
-            d_out=cfg["emb_dim"],
-            context_length=cfg["context_length"],
-            num_heads=cfg["n_heads"],
-            dropout=cfg["drop_rate"],
-            qkv_bias=cfg["qkv_bias"])
+            d_in=cfg.get_setting("model_configs.emb_dim"),
+            d_out=cfg.get_setting("model_configs.emb_dim"),
+            context_length=cfg.get_setting("model_configs.context_length"),
+            num_heads=cfg.get_setting("model_configs.n_heads"),
+            dropout=cfg.get_setting("model_configs.drop_rate"),
+            qkv_bias=cfg.get_setting("model_configs.qkv_bias"))
         self.ff = FeedForward(cfg)
-        self.norm1 = LayerNorm(cfg["emb_dim"])
-        self.norm2 = LayerNorm(cfg["emb_dim"])
-        self.drop_shortcut = nn.Dropout(cfg["drop_rate"])
+        self.norm1 = LayerNorm(cfg.get_setting("model_configs.emb_dim"))
+        self.norm2 = LayerNorm(cfg.get_setting("model_configs.emb_dim"))
+        self.drop_shortcut = nn.Dropout(cfg.get_setting("model_configs.drop_rate"))
 
     def forward(self, x):
         # Shortcut connection for attention block
@@ -130,17 +132,17 @@ class TransformerBlock(nn.Module):
 
 
 class GPTModel(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg:ConfigurationManager):
         super().__init__()
-        self.tok_emb = nn.Embedding(cfg["vocab_size"], cfg["emb_dim"])            # Token embedding
-        self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])        # Positional embedding
-        self.drop_emb = nn.Dropout(cfg["drop_rate"])                              # Droput layer (masking)
+        self.tok_emb = nn.Embedding(cfg.get_setting("model_configs.vocab_size"), cfg.get_setting("model_configs.emb_dim"))            # Token embedding
+        self.pos_emb = nn.Embedding(cfg.get_setting("model_configs.context_length"), cfg.get_setting("model_configs.emb_dim"))        # Positional embedding
+        self.drop_emb = nn.Dropout(cfg.get_setting("model_configs.drop_rate"))                              # Droput layer (masking)
 
         self.trf_blocks = nn.Sequential(
-            *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])             # Transformer blocks
+            *[TransformerBlock(cfg) for _ in range(cfg.get_setting("model_configs.n_layers"))])             # Transformer blocks
 
-        self.final_norm = LayerNorm(cfg["emb_dim"])                               # Normalization layer in the end  
-        self.out_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False)  # Final layer
+        self.final_norm = LayerNorm(cfg.get_setting("model_configs.emb_dim"))                               # Normalization layer in the end  
+        self.out_head = nn.Linear(cfg.get_setting("model_configs.emb_dim"), cfg.get_setting("model_configs.vocab_size"), bias=False)  # Final layer
 
     def forward(self, in_idx):
         batch_size, seq_len = in_idx.shape
