@@ -12,7 +12,7 @@ training:
   test_train_ratio: 0.9  # Test vs Train split ratio
   num_epochs: 20  # Number of epochs (1, since the dataset is already huge)
   batch_size: 16  # Suggested 8 or less for local training, 16/32/64/128 for GPU
-  subset_ratio: 100  # Percentage of original dataset to use (e.g., 0.1 = 10%)
+  subset_ratio: 1.0  # Percentage of original dataset to use (e.g., 0.1 = 10%)
   advanced_training: true  # Enables learning rate warmup, cosine decay and gradient clipping
   test_before_training: true  # If true, tests model before training (may take time)
 
@@ -24,9 +24,9 @@ inference:
 # Model Architecture Configurations
 model_configs: # 124M parameter configuration
   vocab_size: 50257   # Vocabulary size
-  context_length: 96 # Shortened context length (orig: 1024)
+  context_length: 256 # Shortened context length (orig: 1024)
   emb_dim: 768       # Embedding dimension
   n_heads: 12        # Number of attention heads
   n_layers: 12       # Number of layers
-  drop_rate: 0.1     # Dropout rate
-  qkv_bias: false    # Query-key-value bias
+  drop_rate: 0.01     # Dropout rate
+  qkv_bias: true    # Query-key-value bias
