@@ -7,7 +7,7 @@ from utils.misc import print_lib_versions, set_device
 from utils.models import GPTModel, save_model
 from utils.plot import plot_losses
 from utils.eval import calc_loss_loader, generate_and_print_sample
-from utils.training import train_model_simple, train_model_advanced
+from training.trainer import train_model_simple, train_model_advanced
 from utils.data import create_dataloader_HFD, get_wiki_dataset
 
 # Constants

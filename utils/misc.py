@@ -1,19 +1,20 @@
 # Miscellaneous helper functions
 import torch
 from importlib.metadata import version
+import logging
 
-def print_lib_versions():
-    print(f"{50 * '='}")
-    print("\t\tPACKAGES VERSIONS")
-    print(f"{50 * '='}")
+def print_lib_versions(logger:logging.Logger):
+    logger.info(f"{50 * '='}")
+    logger.info("\t\tPACKAGES VERSIONS")
+    logger.info(f"{50 * '='}")
     pkgs = ["matplotlib", 
         "numpy", 
         "tiktoken", 
         "torch",
-        "tensorflow" # For OpenAI's pretrained weights
+        #"tensorflow" # For OpenAI's pretrained weights
        ]
     for p in pkgs:
-        print(f"{p} version: {version(p)}")
+        logger.info(f"{p} version: {version(p)}")
 
 def text_to_token_ids(text, tokenizer):
     encoded = tokenizer.encode(text, allowed_special={'<|endoftext|>'})

@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from typing import Tuple, List, Dict, Any, Optional
 from dataclasses import dataclass
-from downloaders import CorpusDownloader
+from data.downloaders import CorpusDownloader
 
 @dataclass
 class DataLoaderConfig:
