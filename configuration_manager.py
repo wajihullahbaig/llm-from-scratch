@@ -199,29 +199,3 @@ class ConfigurationManager:
         self.logger.info("Current Configuration Settings:")
         _print_dict(self.config)
 
-	# Example usage:
-if __name__ == "__main__":
-    # Example: Create a custom logger
-    custom_logger = logging.getLogger("CustomLogger")
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - CUSTOM - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    custom_logger.addHandler(handler)
-    custom_logger.setLevel(logging.INFO)
-    
-    # Create configuration manager with custom logger
-    config_manager = ConfigurationManager(
-        config_path='gpt2_124m_config.yaml',
-        logger=custom_logger
-    )
-    
-    # Example: Create configuration manager with default logger
-    default_config_manager = ConfigurationManager(
-        config_path='gpt2_355m_config.yaml'
-    )
-    
-    # Test configuration validation
-    config_manager.validate_gpt_config()
-    
-    # Print settings using custom logger
-    config_manager.print_settings()
