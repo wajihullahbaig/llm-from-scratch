@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train-Alice",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "training/train_gpt_txt.py",
+            "args": [
+                "--settings",
+                "${workspaceFolder}/configs/gpt2_162m_config.yaml"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "%PYTHONPATH%;${workspaceFolder}"
+            },
+        },
+        {
+            "name": "Train-Wikipedia",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "training/train_gpt_wiki.py",
+            "args": [
+                "--settings",
+                "${workspaceFolder}/configs/gpt2_162m_config.yaml"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "%PYTHONPATH%;${workspaceFolder}"
+            },
+        }
+    ]
+}

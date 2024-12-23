@@ -1,0 +1,32 @@
+# GPT Model Configuration File
+
+# Model settings
+model:
+  output_dir: outputs
+  save_name: gpt-model-text-2.pt
+  device: null  # cpu, mps or cuda. If None, will select the best available one
+  model_type: GPT_CONFIG_162M  
+
+# Training configuration
+training:
+  test_train_ratio: 0.9  # Test vs Train split ratio
+  num_epochs: 20  # Number of epochs (1, since the dataset is already huge)
+  batch_size: 16  # Suggested 8 or less for local training, 16/32/64/128 for GPU
+  subset_ratio: 0.01  # Percentage of original dataset to use (e.g., 0.1 = 10%)
+  advanced_training: false  # Enables learning rate warmup, cosine decay and gradient clipping
+  test_before_training: false  # If true, tests model before training (may take time)
+
+# Inference settings
+inference:
+  start_context: "Water is essential for all forms of life because "
+  temperature: 1.2
+
+# Model Architecture Configurations
+model_configs: # 124M parameter configuration
+  vocab_size: 50257   # Vocabulary size
+  context_length: 256 # Shortened context length (orig: 1024)
+  emb_dim: 768       # Embedding dimension
+  n_heads: 12        # Number of attention heads
+  n_layers: 12       # Number of layers
+  drop_rate: 0.01     # Dropout rate
+  qkv_bias: true    # Query-key-value bias
