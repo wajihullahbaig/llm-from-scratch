@@ -11,7 +11,7 @@ model:
 training:
   test_train_ratio: 0.9  # Test vs Train split ratio
   num_epochs: 20  # Number of epochs (1, since the dataset is already huge)
-  batch_size: 16  # Suggested 8 or less for local training, 16/32/64/128 for GPU
+  batch_size: 32  # Suggested 8 or less for local training, 16/32/64/128 for GPU
   subset_ratio: 0.01  # Percentage of original dataset to use (e.g., 0.1 = 10%)
   advanced_training: false  # Enables learning rate warmup, cosine decay and gradient clipping
   test_before_training: false  # If true, tests model before training (may take time)
