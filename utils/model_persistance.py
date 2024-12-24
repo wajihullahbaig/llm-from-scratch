@@ -3,6 +3,8 @@ from logging import Logger
 import torch
 import torch.nn as nn
 
+from models.gpt2_model import GPTModel
+
 def save_model(model_save_path, model, optimizer, train_losses, val_losses, config, num_epochs, logger:Logger):
     torch.save({
         'model_state_dict': model.state_dict(),

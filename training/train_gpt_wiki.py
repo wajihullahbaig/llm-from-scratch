@@ -9,7 +9,7 @@ import sys
 from data.dataset_processors import DataLoaderConfig, DatasetProcessor
 from utils.misc import print_lib_versions, set_device
 from utils.model_summary import print_model_summary
-from utils.models import GPTModel, save_model
+from utils.model_persistance import GPTModel, save_model
 from utils.plot import plot_losses
 from utils.eval import calc_loss_loader
 from text_generation.text_generator import TextGenerator

@@ -2,7 +2,7 @@
 import logging
 from configs.configuration_manager import ConfigurationManager
 from text_generation.text_generator import TextGenerator
-from utils.models import load_model
+from utils.model_persistance import load_model
 from utils.misc import set_device
 
 import tiktoken
