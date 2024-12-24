@@ -7,11 +7,12 @@ import logging
 import sys
 
 from data.dataset_processors import DataLoaderConfig, DatasetProcessor
+from text_generation.text_generator import TextGenerator
 from utils.misc import print_lib_versions, set_device
 from utils.model_summary import print_model_summary
 from utils.models import GPTModel, save_model
 from utils.plot import plot_losses
-from utils.eval import calc_loss_loader, generate_and_print_sample
+from utils.eval import calc_loss_loader
 from training.trainer import train_model_simple, train_model_advanced
 from utils.seeding import set_seed
 from configs.configuration_manager import ConfigurationManager
@@ -171,9 +172,16 @@ def main():
 
         # Checking initial model output
         logger.info("Model output before training:")
-        generate_and_print_sample(
-            model, tokenizer, device, llm_configs.get_setting('inference.start_context'), llm_configs.get_setting('inference.temperature')
+        tg = TextGenerator(model, tokenizer, context_size=llm_configs.get_setting("model_configs.context_length"))
+        # Generate from text prompt
+        output_text = tg.generate_text(
+            prompt=llm_configs.get_setting("inference.start_context"),
+            max_new_tokens=llm_configs.get_setting("inference.max_new_tokens"),
+            temperature=llm_configs.get_setting("inference.temperature"),
+            top_k=llm_configs.get_setting("inference.top_k"),
+            top_p=llm_configs.get_setting("inference.top_p")
         )
+        logger.info(output_text)
 
     
     logger.info(f"{50 * '='}")
@@ -194,31 +202,25 @@ def main():
     # Starting the time counter
     start_time = time.time()
 
-    if llm_configs.get_setting('training.advanced_training'):
+    if llm_configs.get_setting("training.advanced_training"):
         # Training with advanced techniques like learning rate warmup, cosine decay and gradient clipping.
-        total_steps = len(train_loader) * llm_configs.get_setting('training.num_epochs')
+        total_steps = len(train_loader) * llm_configs.get_setting("training.num_epochs")
         warmup_steps = int(0.2 * total_steps) # 20% warmup
         
         train_losses, val_losses, tokens_seen, lrs = train_model_advanced(
-            model, train_loader, val_loader, 
-            optimizer, device, n_epochs=llm_configs.get_setting('training.num_epochs'),
-            eval_freq=5, 
-            eval_iter=1, 
-            start_context=llm_configs.get_setting('inference.start_context'),
+            model, train_loader, val_loader, optimizer, device, 
+            eval_freq=5, eval_iter=1, 
             tokenizer=tokenizer, warmup_steps=warmup_steps, 
-            initial_lr=1e-8, min_lr=1e-5, temperature= llm_configs.get_setting('inference.temperature')
+            initial_lr=1e-5, min_lr=1e-5, llm_configs=llm_configs,logger=logger
         )
     else:
         # Training in a more simple way (without learning rate warmup, cosine decay and gradient clipping).
         train_losses, val_losses, tokens_seen = train_model_simple(
             model, train_loader, val_loader, optimizer, device,
-            num_epochs=llm_configs.get_setting('training.num_epochs'), 
-            eval_freq=5, 
-            eval_iter=5,
-            start_context=llm_configs.get_setting('inference.start_context'), 
-            tokenizer=tokenizer, 
-            temperature= llm_configs.get_setting('inference.temperature')
+            eval_freq=5, eval_iter=5,
+            tokenizer=tokenizer, llm_configs=llm_configs,logger=logger
         )
+
 
     # Printing time it took to train
     end_time = time.time()

@@ -1,16 +1,19 @@
 # Helper functions for model training and weights updating
-from utils.eval import calc_loss_batch, evaluate_model, generate_and_print_sample
+from configs.configuration_manager import ConfigurationManager
+from text_generation.text_generator import TextGenerator
+from utils.eval import calc_loss_batch, evaluate_model
 import math
 import torch
+from logging import Logger
 
-def train_model_simple(model, train_loader, val_loader, optimizer, device, num_epochs,
-                       eval_freq, eval_iter, start_context, tokenizer, temperature=1.0):
+def train_model_simple(model, train_loader, val_loader, optimizer, device, 
+                       eval_freq, eval_iter,  tokenizer, llm_configs:ConfigurationManager,logger:Logger=None):
     # Initialize lists to track losses and tokens seen
     train_losses, val_losses, track_tokens_seen = [], [], []
     tokens_seen, global_step = 0, -1
 
     # Main training loop
-    for epoch in range(num_epochs):
+    for epoch in range(llm_configs.get_setting("training.num_epochs")):
         model.train()  # Set model to training mode
         
         for input_batch, target_batch in train_loader:
@@ -29,21 +32,29 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)
-                print(f"Epoch {epoch+1} (Step {global_step:06d}): "
+                logger.info(f"Epoch {epoch+1} (Step {global_step:06d}): "
                       f"Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
 
             if global_step % (eval_freq * 5) == 0:
-                # Print a sample text after each epoch
-                generate_and_print_sample(
-                    model, tokenizer, device, start_context, temperature
+                # Generate and print a sample from the model to monitor progress
+                tg = TextGenerator(model, tokenizer, context_size=llm_configs.get_setting("model_configs.context_length"))
+                # Generate from text prompt
+                output_text = tg.generate_text(
+                    prompt=llm_configs.get_setting("inference.start_context"),
+                    max_new_tokens=llm_configs.get_setting("inference.max_new_tokens"),
+                    temperature=llm_configs.get_setting("inference.temperature"),
+                    top_k=llm_configs.get_setting("inference.top_k"),
+                    top_p=llm_configs.get_setting("inference.top_p"),
+                    num_beams = llm_configs.get_setting("inference.num_beams")
                 )
+                logger.info(output_text)
 
     return train_losses, val_losses, track_tokens_seen
 
 # This version of training includes learning rate warmup, cosine decay and gradient clipping
 def train_model_advanced(model, train_loader, val_loader, optimizer, device,
-                n_epochs, eval_freq, eval_iter, start_context, tokenizer,
-                warmup_steps=1.0, initial_lr=3e-05, min_lr=1e-6, temperature=1.0):
+                eval_freq, eval_iter, tokenizer,
+                warmup_steps=1.0, initial_lr=3e-05, min_lr=1e-6, llm_configs:ConfigurationManager=None,logger:Logger = None):
 
     train_losses, val_losses, track_tokens_seen, track_lrs = [], [], [], []
     tokens_seen, global_step = 0, -1
@@ -52,12 +63,12 @@ def train_model_advanced(model, train_loader, val_loader, optimizer, device,
     peak_lr = optimizer.param_groups[0]["lr"]
 
     # Calculate the total number of iterations in the training process
-    total_training_steps = len(train_loader) * n_epochs
+    total_training_steps = len(train_loader) * llm_configs.get_setting("training.num_epochs")
 
     # Calculate the learning rate increment during the warmup phase
     lr_increment = (peak_lr - initial_lr) / warmup_steps
 
-    for epoch in range(n_epochs):
+    for epoch in range(llm_configs.get_setting("training.num_epochs")):
         model.train()
         for input_batch, target_batch in train_loader:
             optimizer.zero_grad()
@@ -99,15 +110,23 @@ def train_model_advanced(model, train_loader, val_loader, optimizer, device,
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)
                 # Print the current losses
-                print(f"Epoch {epoch+1} (Iter {global_step:06d}): "
+                logger.info(f"Epoch {epoch+1} (Iter {global_step:06d}): "
                       f"Train loss {train_loss:.3f}, "
                       f"Val loss {val_loss:.3f}"
                 )
 
             if global_step % (eval_freq * 5) == 0:
                 # Generate and print a sample from the model to monitor progress
-                generate_and_print_sample(
-                    model, tokenizer, device, start_context, temperature
+                tg = TextGenerator(model, tokenizer, context_size=llm_configs.get_setting("model_configs.context_length"))
+                # Generate from text prompt
+                output_text = tg.generate_text(
+                    prompt=llm_configs.get_setting("inference.start_context"),
+                    max_new_tokens=llm_configs.get_setting("inference.max_new_tokens"),
+                    temperature=llm_configs.get_setting("inference.temperature"),
+                    top_k=llm_configs.get_setting("inference.top_k"),
+                    top_p=llm_configs.get_setting("inference.top_p"),
+                    num_beams = llm_configs.get_setting("inference.num_beams")
                 )
+                logger.info(output_text)
 
     return train_losses, val_losses, track_tokens_seen, track_lrs
