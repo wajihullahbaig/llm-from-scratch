@@ -24,6 +24,7 @@ inference:
   top_k: 50
   top_p: 0.9
   num_beams: 1 # Greater than 1 for decoding using sampling, otherwise its greedy. 
+  early_stopping: true
 
 # Model Architecture Configurations
 model_configs: # 400M parameter configuration

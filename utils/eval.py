@@ -1,7 +1,5 @@
 # Helper functions for evaluation
 import torch
-from utils.misc import text_to_token_ids, token_ids_to_text
-from utils.models import generate_text_simple
 
 def calc_loss_batch(input_batch, target_batch, model, device):
     input_batch, target_batch = input_batch.to(device), target_batch.to(device)
@@ -36,16 +34,3 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     model.train()
     return train_loss, val_loss
 
-def generate_and_print_sample(model, tokenizer, device, start_context, temperature=1.0):
-    model.eval()
-    context_size = model.pos_emb.weight.shape[0]
-    encoded = text_to_token_ids(start_context, tokenizer).to(device)
-    with torch.no_grad():
-        token_ids = generate_text_simple(
-            model=model, idx=encoded,
-            max_new_tokens=50, context_size=context_size,
-            temperature=temperature
-        )
-    decoded_text = token_ids_to_text(token_ids, tokenizer)
-    print(decoded_text.replace("\n", " "))  # Compact print format
-    model.train()

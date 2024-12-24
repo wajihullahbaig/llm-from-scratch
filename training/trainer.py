@@ -45,7 +45,8 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device,
                     temperature=llm_configs.get_setting("inference.temperature"),
                     top_k=llm_configs.get_setting("inference.top_k"),
                     top_p=llm_configs.get_setting("inference.top_p"),
-                    num_beams = llm_configs.get_setting("inference.num_beams")
+                    num_beams = llm_configs.get_setting("inference.num_beams"),
+                    early_stopping = llm_configs.get_setting("inference.early_stopping")
                 )
                 logger.info(output_text)
 
@@ -125,7 +126,8 @@ def train_model_advanced(model, train_loader, val_loader, optimizer, device,
                     temperature=llm_configs.get_setting("inference.temperature"),
                     top_k=llm_configs.get_setting("inference.top_k"),
                     top_p=llm_configs.get_setting("inference.top_p"),
-                    num_beams = llm_configs.get_setting("inference.num_beams")
+                    num_beams = llm_configs.get_setting("inference.num_beams"),
+                    early_stopping = llm_configs.get_setting("inference.early_stopping")
                 )
                 logger.info(output_text)
 

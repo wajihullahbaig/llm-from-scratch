@@ -154,33 +154,6 @@ class GPTModel(nn.Module):
         logits = self.out_head(x)
         return logits
 
-def generate_text_simple(model, idx, max_new_tokens, context_size, temperature=1.0):
-    # idx is (B, T) array of indices in the current context
-    for _ in range(max_new_tokens):
-        # Crop current context if it exceeds the supported context size
-        idx_cond = idx[:, -context_size:]
-
-        # Get the predictions
-        with torch.no_grad():
-            logits = model(idx_cond)
-
-        # Focus only on the last time step
-        logits = logits[:, -1, :]  # (batch, vocab_size)
-
-        # Apply temperature scaling
-        logits = logits / temperature
-
-        # Convert logits to probabilities using softmax
-        probs = torch.softmax(logits, dim=-1)
-
-        # Sample from the probability distribution
-        idx_next = torch.multinomial(probs, num_samples=1)  # (batch, 1)
-
-        # Append sampled index to the running sequence
-        idx = torch.cat((idx, idx_next), dim=1)  # (batch, n_tokens+1)
-
-    return idx
-
 def save_model(model_save_path, model, optimizer, train_losses, val_losses, config, num_epochs, logger:Logger):
     torch.save({
         'model_state_dict': model.state_dict(),
