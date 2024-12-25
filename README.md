@@ -12,7 +12,7 @@
   - `train_gpt_txt.py`: Trains on a small text dataset (e.g., "Alice in Wonderland"), suitable for quick local experiments.
   - `train_gpt_wiki.py`: Trains on a large English Wikipedia dataset (~11 GB, ~6.4M articles), requiring a Hugging Face account and API token.
 
-  - **Modular training scripts (CLI):**  
+- **Modular training scripts (CLI):**  
   - `train_gpt_txt.py /configs/gpt2_162m_config.yaml`: Trains on a small text dataset (e.g., "Alice in Wonderland"), suitable for quick local experiments.
   - `train_gpt_wiki.py /configs/gpt2_162m_config.yaml`: Trains on a large English Wikipedia dataset (~11 GB, ~6.4M articles), requiring a Hugging Face account and API token.
 
