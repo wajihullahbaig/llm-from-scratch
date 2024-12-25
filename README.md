@@ -50,14 +50,14 @@
     Ideal for quick local tests and understanding the training loop:
 
     ```
-    python train_gpt_txt.py
+    python train_gpt_txt.py /configs/gpt2_162m_config.yaml
     ```
 
 - **Large Dataset (English Wikipedia):**
 
     For more realistic large-scale training (GPU recommended):
     ```
-    python train_gpt_wiki.py
+    python train_gpt_wiki.py /configs/gpt2_162m_config.yaml
     ```
 
 ## Important Parameters
