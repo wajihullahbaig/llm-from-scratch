@@ -7,7 +7,8 @@
 
 ## Key Features
 
-- **Modular training scripts:**  
+- **Modular training scripts (VSCODE):**  
+  - You will need to modify launch.json and provide the yaml settings file and training script 
   - `train_gpt_txt.py`: Trains on a small text dataset (e.g., "Alice in Wonderland"), suitable for quick local experiments.
   - `train_gpt_wiki.py`: Trains on a large English Wikipedia dataset (~11 GB, ~6.4M articles), requiring a Hugging Face account and API token.
 
