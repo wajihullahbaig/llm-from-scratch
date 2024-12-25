@@ -13,13 +13,13 @@ training:
   num_epochs: 20 # Number of epochs (1, since the dataset is already huge)
   batch_size: 24  # Suggested 8 or less for local training, 16/32/64/128 for GPU
   subset_ratio: 0.005  # Percentage of original dataset to use (e.g., 0.1 = 10%)
-  advanced_training: true  # Enables learning rate warmup, cosine decay and gradient clipping
+  advanced_training: false  # Enables learning rate warmup, cosine decay and gradient clipping
   test_before_training: false  # If true, tests model before training (may take time)
 
 # Inference settings
 inference:
   start_context: "Water is essential for all forms of life because"
-  decoding_method: "top_k_p" # basic, beam_search, top_k_p, greedy
+  decoding_method: "greedy" # basic, beam_search, top_k_p, greedy
   basic:
     max_new_tokens: 50
     temperature: 1.2

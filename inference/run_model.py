@@ -9,11 +9,9 @@ import tiktoken
 
 from utils.seeding import set_seed
 
-# Change the string below for the saved model's name
-MODEL_PATH = f"gpt_model_1epochs-wiki-1-500min.pt"
-TEMPERATURE = 1.2
 
 def main():
+    MODEL_PATH = f"gpt_model_1epochs-wiki-1-500min.pt"
     model = load_model(MODEL_PATH)
 
     tokenizer = tiktoken.get_encoding("gpt2")

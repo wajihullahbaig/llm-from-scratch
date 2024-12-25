@@ -189,7 +189,7 @@ def main():
             model, train_loader, val_loader, optimizer, device, 
             eval_freq=5, eval_iter=1, 
             tokenizer=tokenizer, warmup_steps=warmup_steps, 
-            initial_lr=1e-2, min_lr=1e-6,decoding_method=decoding_method, llm_configs=llm_configs,logger=logger
+            initial_lr=1e-4, min_lr=1e-4,decoding_method=decoding_method, llm_configs=llm_configs,logger=logger
         )
     else:
         # Training in a more simple way (without learning rate warmup, cosine decay and gradient clipping).
