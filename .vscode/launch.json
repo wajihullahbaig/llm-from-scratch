@@ -33,6 +33,21 @@
             "env": {
                 "PYTHONPATH": "%PYTHONPATH%;${workspaceFolder}"
             },
+        },
+        {
+            "name": "Test-Text-Generation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "text_generation/test_text_generation.py",
+            "args": [
+                "--settings",
+                "${workspaceFolder}/configs/gpt2_162m_config.yaml"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "%PYTHONPATH%;${workspaceFolder}"
+            },
         }
     ]
 }

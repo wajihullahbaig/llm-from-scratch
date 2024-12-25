@@ -179,7 +179,6 @@ def main():
 
     # Starting the time counter
     start_time = time.time()
-    decoding_method = llm_configs.get_setting('inference.decoding_method')
     if llm_configs.get_setting("training.advanced_training"):
         # Training with advanced techniques like learning rate warmup, cosine decay and gradient clipping.
         total_steps = len(train_loader) * llm_configs.get_setting("training.num_epochs")
@@ -189,14 +188,14 @@ def main():
             model, train_loader, val_loader, optimizer, device, 
             eval_freq=5, eval_iter=1, 
             tokenizer=tokenizer, warmup_steps=warmup_steps, 
-            initial_lr=1e-4, min_lr=1e-4,decoding_method=decoding_method, llm_configs=llm_configs,logger=logger
+            initial_lr=1e-5, min_lr=1e-5, llm_configs=llm_configs,logger=logger
         )
     else:
         # Training in a more simple way (without learning rate warmup, cosine decay and gradient clipping).
         train_losses, val_losses, tokens_seen = train_model_simple(
             model, train_loader, val_loader, optimizer, device,
             eval_freq=5, eval_iter=5,
-            tokenizer=tokenizer,decoding_method=decoding_method, llm_configs=llm_configs,logger=logger
+            tokenizer=tokenizer, llm_configs=llm_configs,logger=logger
         )
 
     # Printing time it took to train
@@ -211,7 +210,17 @@ def main():
     base_path = os.path.join(llm_configs.get_setting('model.output_dir'),llm_configs.get_setting('model.model_type') )
     os.makedirs(base_path, exist_ok=True)
     full_path = os.path.join(base_path, llm_configs.get_setting('model.save_name'))
-    save_model(full_path, model, optimizer, train_losses, val_losses, llm_configs.get_setting('model.model_type'), llm_configs.get_setting('training.num_epochs'),logger)
+    config_dict = {
+    'model_type': llm_configs.get_setting("model.model_type"),
+    'vocab_size': llm_configs.get_setting("model_configs.vocab_size"),
+    'emb_dim': llm_configs.get_setting("model_configs.emb_dim"),
+    'context_length': llm_configs.get_setting("model_configs.context_length"),
+    'n_heads': llm_configs.get_setting("model_configs.n_heads"),
+    'n_layers': llm_configs.get_setting("model_configs.n_layers"),
+    'drop_rate': llm_configs.get_setting("model_configs.drop_rate"),
+    'qkv_bias': llm_configs.get_setting("model_configs.qkv_bias"),
+    }
+    save_model(full_path, model, optimizer, train_losses, val_losses, config_dict, llm_configs.get_setting('training.num_epochs'), logger)
 
 
 if __name__ == "__main__":

@@ -8,10 +8,9 @@ from utils.seeding import set_seed
 def test_text_generation():
     # Initialize model and tokenizer
     tokenizer = tiktoken.get_encoding("gpt2")
-    tokenizer = tiktoken.get_encoding("gpt2")
     device = set_device()
-    MODEL_PATH = f"gpt_model_1epochs-wiki-1-500min.pt"
-    model = load_model(MODEL_PATH)
+    MODEL_PATH = f"outputs/GPT_CONFIG_162M/gpt-model-text-2.pt"
+    model,config = load_model(MODEL_PATH)
     model.to(device)
 
     print(f"\n\n{50*'='}")
@@ -19,11 +18,11 @@ def test_text_generation():
     generator = TextGenerator(
         model=model,
         tokenizer=tokenizer,
-        context_size=1024
+        context_size=config["context_length"],
     )
 
     # Test Case 1: Basic Generation with different temperatures
-    prompt = "The future of artificial intelligence is"
+    prompt = "Alice was a playful"
     print("\n=== Temperature Testing ===")
     for temp in [0.2, 0.7, 1.5]:
         output = generator.generate_text(
