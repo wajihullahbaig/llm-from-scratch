@@ -12,6 +12,10 @@
   - `train_gpt_txt.py`: Trains on a small text dataset (e.g., "Alice in Wonderland"), suitable for quick local experiments.
   - `train_gpt_wiki.py`: Trains on a large English Wikipedia dataset (~11 GB, ~6.4M articles), requiring a Hugging Face account and API token.
 
+  - **Modular training scripts (CLI):**  
+  - `train_gpt_txt.py /configs/gpt2_162m_config.yaml`: Trains on a small text dataset (e.g., "Alice in Wonderland"), suitable for quick local experiments.
+  - `train_gpt_wiki.py /configs/gpt2_162m_config.yaml`: Trains on a large English Wikipedia dataset (~11 GB, ~6.4M articles), requiring a Hugging Face account and API token.
+
 - **Parameter Tuning:**  
   Easily adjust training parameters (batch size, context length, subset ratios, advanced training techniques) directly in the scripts.
 
@@ -107,7 +111,7 @@ model_configs: # 162M parameter configuration
     python gpu_debug_test.py
     ```
 
-## Results and Performance (124M model, CPU and MPS on Macbook Pro M2, 32GB RAM; GPU on single A100)
+## Results and Performance (162M model, CPU and MPS on Macbook Pro M2, 32GB RAM; GPU on single A100)
 ### “Alice in Wonderland” Training:
 
 - CPU: ~3.96 min
@@ -120,11 +124,11 @@ model_configs: # 162M parameter configuration
 - MPS: ~2.41 min
 - GPU: ~0.46 min (batch=8), ~0.4 min (batch=32)
 
-These results show clear performance gains when using GPU acceleration and larger batch sizes. Even a small fraction of the Wikipedia dataset produces coherent text. Using the 124M model on a fraction of Wikipedia (1% of data, ~30 million tokens) for ~37 minutes on a GPU yields significantly more logical and coherent text than training solely on a small dataset.
+These results show clear performance gains when using GPU acceleration and larger batch sizes. Even a small fraction of the Wikipedia dataset produces coherent text. Using the 162M model on a fraction of Wikipedia (1% of data, ~30 million tokens) for ~37 minutes on a GPU yields significantly more logical and coherent text than training solely on a small dataset.
 
 ## Tips
 - **Smaller Model + More Data:** Often produces more coherent results than a larger model trained on very limited data.
-- **Advanced Training Techniques:** Try enabling `ADVANCED_TRAINING` for learning rate warmup, cosine decay, and gradient clipping to improve stability and results.
+- **Advanced Training Techniques:** Try enabling `test_before_training: true` for learning rate warmup, cosine decay, and gradient clipping to improve stability and results.
 - **Experimentation is Key:** Adjust batch sizes, subsets of data, and training time to see what fits your compute resources and desired outcome.
 
 ## Further Reading
