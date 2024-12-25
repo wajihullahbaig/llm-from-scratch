@@ -83,8 +83,27 @@ training:
 
 # Inference settings
 inference:
-  start_context: "Water is essential for all forms of life because "
-  temperature: 1.2
+  start_context: "Water is essential for all forms of life because"
+  decoding_method: "top_k_p" # basic, beam_search, top_k_p, greedy
+  basic:
+    max_new_tokens: 50
+    temperature: 1.2
+  beam_search:
+    max_new_tokens: 50    
+    temperature: 0.7
+    num_beams: 5
+    early_stopping: True
+    no_repeat_ngram_size: 3
+  top_k_p: 
+    max_new_tokens: 50    
+    temperature: 0.7
+    top_k: 50
+    top_p: 0.9
+    repetition_penalty: 1.2
+  greedy:
+    max_new_tokens: 50    
+    temperature: 1.0
+    do_sample: False
 
 # Model Architecture Configurations
 model_configs: # 162M parameter configuration

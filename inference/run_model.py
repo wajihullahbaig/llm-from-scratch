@@ -33,10 +33,44 @@ def main():
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     llm_configs = ConfigurationManager("config.yaml",logger=logger)     
-    tg = TextGenerator(model, tokenizer, llm_configs, logger=logger)
-    text = tg.generate_text(start_context)
+    generator = TextGenerator(model, tokenizer, llm_configs, logger=logger)
+    text = generator.generate_text(start_context)
     logger.info(text)
 
+    # Basic usage with temperature
+    text = generator.generate_text(
+        prompt="Once upon a time",
+        max_new_tokens=50,
+        temperature=0.7
+    )
+
+    # With top-k and top-p sampling
+    text = generator.generate_text(
+        prompt="Once upon a time",
+        max_new_tokens=50,
+        temperature=0.7,
+        top_k=50,
+        top_p=0.9,
+        repetition_penalty=1.2
+    )
+
+    # Using beam search
+    text = generator.generate_text(
+        prompt="Once upon a time",
+        max_new_tokens=50,
+        num_beams=5,
+        temperature=0.7,
+        early_stopping=True,
+        no_repeat_ngram_size=3
+    )
+
+    # Using greedy decoding (no sampling)
+    text = generator.generate_text(
+        prompt="Once upon a time",
+        max_new_tokens=50,
+        do_sample=False,
+        temperature=1.0
+    )
     
 if __name__ == "__main__":
     main()

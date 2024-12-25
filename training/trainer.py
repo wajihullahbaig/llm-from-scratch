@@ -7,7 +7,7 @@ import torch
 from logging import Logger
 
 def train_model_simple(model, train_loader, val_loader, optimizer, device, 
-                       eval_freq, eval_iter,  tokenizer, llm_configs:ConfigurationManager,logger:Logger=None):
+                       eval_freq, eval_iter,  tokenizer, decoding_method = "", llm_configs:ConfigurationManager = None, logger:Logger=None):
     # Initialize lists to track losses and tokens seen
     train_losses, val_losses, track_tokens_seen = [], [], []
     tokens_seen, global_step = 0, -1
@@ -39,15 +39,7 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device,
                 # Generate and print a sample from the model to monitor progress
                 tg = TextGenerator(model, tokenizer, context_size=llm_configs.get_setting("model_configs.context_length"))
                 # Generate from text prompt
-                output_text = tg.generate_text(
-                    prompt=llm_configs.get_setting("inference.start_context"),
-                    max_new_tokens=llm_configs.get_setting("inference.max_new_tokens"),
-                    temperature=llm_configs.get_setting("inference.temperature"),
-                    top_k=llm_configs.get_setting("inference.top_k"),
-                    top_p=llm_configs.get_setting("inference.top_p"),
-                    num_beams = llm_configs.get_setting("inference.num_beams"),
-                    early_stopping = llm_configs.get_setting("inference.early_stopping")
-                )
+                output_text = generate_text_on_method(tg, llm_configs, decoding_method)
                 logger.info(output_text)
 
     return train_losses, val_losses, track_tokens_seen
@@ -55,7 +47,7 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device,
 # This version of training includes learning rate warmup, cosine decay and gradient clipping
 def train_model_advanced(model, train_loader, val_loader, optimizer, device,
                 eval_freq, eval_iter, tokenizer,
-                warmup_steps=1.0, initial_lr=3e-05, min_lr=1e-6, llm_configs:ConfigurationManager=None,logger:Logger = None):
+                warmup_steps=1.0, initial_lr=3e-05, min_lr=1e-6, decoding_method = "",llm_configs:ConfigurationManager=None,logger:Logger = None):
 
     train_losses, val_losses, track_tokens_seen, track_lrs = [], [], [], []
     tokens_seen, global_step = 0, -1
@@ -120,15 +112,48 @@ def train_model_advanced(model, train_loader, val_loader, optimizer, device,
                 # Generate and print a sample from the model to monitor progress
                 tg = TextGenerator(model, tokenizer, context_size=llm_configs.get_setting("model_configs.context_length"))
                 # Generate from text prompt
-                output_text = tg.generate_text(
-                    prompt=llm_configs.get_setting("inference.start_context"),
-                    max_new_tokens=llm_configs.get_setting("inference.max_new_tokens"),
-                    temperature=llm_configs.get_setting("inference.temperature"),
-                    top_k=llm_configs.get_setting("inference.top_k"),
-                    top_p=llm_configs.get_setting("inference.top_p"),
-                    num_beams = llm_configs.get_setting("inference.num_beams"),
-                    early_stopping = llm_configs.get_setting("inference.early_stopping")
-                )
+                output_text = generate_text_on_method(tg, llm_configs, decoding_method)
                 logger.info(output_text)
 
     return train_losses, val_losses, track_tokens_seen, track_lrs
+
+def generate_text_on_method(generator:TextGenerator,llm_configs:ConfigurationManager, method:str) -> str:
+    output_text = ""
+    if method == 'basic':
+        output_text = generator.generate_text(
+                    prompt=llm_configs.get_setting("inference.start_context"),
+                    max_new_tokens=llm_configs.get_setting(f"inference.{method}.max_new_tokens"),
+                    temperature=llm_configs.get_setting(f"inference.{method}.temperature"),                    
+                )
+    elif method == 'beam_search':
+        output_text = generator.generate_text(
+                    prompt=llm_configs.get_setting("inference.start_context"),
+                    max_new_tokens=llm_configs.get_setting(f"inference.{method}.max_new_tokens"),
+                    temperature=llm_configs.get_setting(f"inference.{method}.temperature"),
+                    num_beams = llm_configs.get_setting(f"inference.{method}.num_beams"),
+                    early_stopping = llm_configs.get_setting(f"inference.{method}.early_stopping"),
+                    no_repeat_ngram_size = llm_configs.get_setting(f"inference.{method}.no_repeat_ngram_size")
+                )    
+
+    elif method == 'top_k_p':
+        output_text = generator.generate_text(
+                    prompt=llm_configs.get_setting("inference.start_context"),
+                    max_new_tokens=llm_configs.get_setting(f"inference.{method}.max_new_tokens"),
+                    temperature=llm_configs.get_setting(f"inference.{method}.temperature"),
+                    top_k=llm_configs.get_setting(f"inference.{method}.top_k"),
+                    top_p=llm_configs.get_setting(f"inference.{method}.top_p"),                    
+                    repetition_penalty=llm_configs.get_setting(f"inference.{method}.repetition_penalty"),                    
+                ) 
+           
+    elif method == 'greedy':
+        output_text = generator.generate_text(
+                    prompt=llm_configs.get_setting("inference.start_context"),
+                    max_new_tokens=llm_configs.get_setting(f"inference.{method}.max_new_tokens"),
+                    temperature=llm_configs.get_setting(f"inference.{method}.temperature"),
+                    do_sample=llm_configs.get_setting(f"inference.{method}.do_sample"),                    
+                ) 
+        
+    else:
+        raise ValueError(f"Invalid decoding method: {method}")   
+    
+    return output_text

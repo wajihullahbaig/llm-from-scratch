@@ -179,7 +179,7 @@ def main():
 
     # Starting the time counter
     start_time = time.time()
-
+    decoding_method = llm_configs.get_setting('inference.decoding_method')
     if llm_configs.get_setting("training.advanced_training"):
         # Training with advanced techniques like learning rate warmup, cosine decay and gradient clipping.
         total_steps = len(train_loader) * llm_configs.get_setting("training.num_epochs")
@@ -189,14 +189,14 @@ def main():
             model, train_loader, val_loader, optimizer, device, 
             eval_freq=5, eval_iter=1, 
             tokenizer=tokenizer, warmup_steps=warmup_steps, 
-            initial_lr=1e-5, min_lr=1e-5, llm_configs=llm_configs,logger=logger
+            initial_lr=1e-2, min_lr=1e-6,decoding_method=decoding_method, llm_configs=llm_configs,logger=logger
         )
     else:
         # Training in a more simple way (without learning rate warmup, cosine decay and gradient clipping).
         train_losses, val_losses, tokens_seen = train_model_simple(
             model, train_loader, val_loader, optimizer, device,
             eval_freq=5, eval_iter=5,
-            tokenizer=tokenizer, llm_configs=llm_configs,logger=logger
+            tokenizer=tokenizer,decoding_method=decoding_method, llm_configs=llm_configs,logger=logger
         )
 
     # Printing time it took to train
