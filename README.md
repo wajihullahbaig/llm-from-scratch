@@ -82,7 +82,7 @@ inference:
   temperature: 1.2
 
 # Model Architecture Configurations
-model_configs: # 124M parameter configuration
+model_configs: # 162M parameter configuration
   vocab_size: 50257   # Vocabulary size
   context_length: 256 # Shortened context length (orig: 1024)
   emb_dim: 768       # Embedding dimension
