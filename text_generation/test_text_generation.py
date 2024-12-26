@@ -9,7 +9,7 @@ def test_text_generation():
     # Initialize model and tokenizer
     tokenizer = tiktoken.get_encoding("gpt2")
     device = set_device()
-    MODEL_PATH = f"outputs/GPT_CONFIG_162M/gpt-model-text-2.pt"
+    MODEL_PATH = f"outputs/26122024_120641/GPT_CONFIG_162M/gpt-model-text-2.pt"
     model,config = load_model(MODEL_PATH)
     model.to(device)
 
@@ -22,9 +22,9 @@ def test_text_generation():
     )
 
     # Test Case 1: Basic Generation with different temperatures
-    prompt = "Alice was a playful"
+    prompt = "Water is essential for all forms of life because"
     print("\n=== Temperature Testing ===")
-    for temp in [0.2, 0.7, 1.5]:
+    for temp in [0.2, 0.7,1.2, 1.5]:
         output = generator.generate_text(
             prompt=prompt,
             max_new_tokens=30,
@@ -36,8 +36,8 @@ def test_text_generation():
     # Test Case 2: Top-k and Top-p Sampling
     print("\n=== Top-k and Top-p Testing ===")
     sampling_configs = [
-        {"top_k": 50, "top_p": None},
-        {"top_k": None, "top_p": 0.9},
+        {"top_k": 10, "top_p": None},
+        {"top_k": None, "top_p": 0.5},
         {"top_k": 50, "top_p": 0.9}
     ]
     
@@ -45,7 +45,7 @@ def test_text_generation():
         output = generator.generate_text(
             prompt=prompt,
             max_new_tokens=30,
-            temperature=0.7,
+            temperature=1.2,
             **config
         )
         print(f"\nConfig {config}:", output)
@@ -58,7 +58,7 @@ def test_text_generation():
             prompt=prompt,
             max_new_tokens=30,
             num_beams=num_beams,
-            temperature=0.7,
+            temperature=1.2,
             early_stopping=True
         )
         print(f"\nBeam Size {num_beams}:", output)
@@ -102,7 +102,7 @@ def test_text_generation():
     outputs = generator.generate_text(
         prompt=prompts,
         max_new_tokens=30,
-        temperature=0.7,
+        temperature=1.2,
         top_k=50,
         top_p=0.9
     )

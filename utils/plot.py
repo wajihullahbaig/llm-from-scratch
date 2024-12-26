@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 
-def plot_losses(num_epochs, tokens_seen, train_losses, val_losses):
+def plot_losses(output_path,num_epochs, tokens_seen, train_losses, val_losses):
     epochs_seen = torch.linspace(0, num_epochs, len(train_losses))
     
     fig, ax1 = plt.subplots(figsize=(5, 3))
@@ -23,5 +23,5 @@ def plot_losses(num_epochs, tokens_seen, train_losses, val_losses):
     ax2.set_xlabel("Tokens seen")
 
     fig.tight_layout()  # Adjust layout to make room
-    plt.savefig("outputs/loss-plot.pdf")
+    plt.savefig(f"{output_path}/loss-plot.pdf")
     plt.show()

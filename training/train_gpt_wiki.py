@@ -1,4 +1,5 @@
 # This file trains a GPT model on a large dataset (English Wikipedia)
+from datetime import datetime
 import os
 import torch
 import time
@@ -74,7 +75,7 @@ def main():
     dataloader_config = DataLoaderConfig(
         batch_size=llm_configs.get_setting('training.batch_size'),
         max_length=llm_configs.get_setting("model_configs.context_length"),
-        stride=llm_configs.get_setting("model_configs.context_length"),
+        stride=llm_configs.get_setting("training.text_stride"),
         drop_last=True,
         shuffle=False,
         num_workers=0
@@ -203,13 +204,16 @@ def main():
     execution_time_minutes = (end_time - start_time) / 60
     logger.info(f"Training completed in {execution_time_minutes:.2f} minutes.")
 
-    # Plottong train and val losses per epoch
-    plot_losses(llm_configs.get_setting('training.num_epochs'), tokens_seen, train_losses, val_losses)
-
-    # Save the trained model (for furture reuse)
-    base_path = os.path.join(llm_configs.get_setting('model.output_dir'),llm_configs.get_setting('model.model_type') )
+    # Plotting the losses
+    date_time = datetime.now().strftime("%d%m%Y_%H%M%S")
+    base_path = os.path.join(llm_configs.get_setting('model.output_dir'),date_time)
     os.makedirs(base_path, exist_ok=True)
-    full_path = os.path.join(base_path, llm_configs.get_setting('model.save_name'))
+    plot_losses(base_path,llm_configs.get_setting('training.num_epochs'), tokens_seen, train_losses, val_losses)
+    
+    # Saving the model
+    base_path = os.path.join(base_path,llm_configs.get_setting('model.model_type'))
+    os.makedirs(base_path, exist_ok=True)
+    full_path = os.path.join(base_path,llm_configs.get_setting('model.save_name'))
     config_dict = {
     'model_type': llm_configs.get_setting("model.model_type"),
     'vocab_size': llm_configs.get_setting("model_configs.vocab_size"),
