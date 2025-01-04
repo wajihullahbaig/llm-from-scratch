@@ -3,7 +3,7 @@
 # Model settings
 model:
   output_dir: outputs
-  save_name: gpt-model-text-2.pt
+  save_name: gpt-model-wiki-162M.pt
   device: null  # cpu, mps or cuda. If None, will select the best available one
   model_type: GPT_CONFIG_162M  
 
@@ -11,16 +11,16 @@ model:
 training:
   test_train_ratio: 0.8  # Test vs Train split ratio
   num_epochs: 20 # Number of epochs (1, since the dataset is already huge)
-  batch_size: 24  # Suggested 8 or less for local training, 16/32/64/128 for GPU
-  subset_ratio: 0.01 # Percentage of original dataset to use (e.g., 0.1 = 10%)
-  advanced_training: false  # Enables learning rate warmup, cosine decay and gradient clipping
+  batch_size: 12  # Suggested 8 or less for local training, 16/32/64/128 for GPU
+  subset_ratio: 0.0025 # Percentage of original dataset to use (e.g., 0.1 = 10%)
+  advanced_training: true  # Enables learning rate warmup, cosine decay and gradient clipping
   test_before_training: false  # If true, tests model before training (may take time)
   text_stride: 64 # While creating input/target ids, we create sliding window chunks using strides, should be less than context_length
 
 # Inference settings
 inference:
   start_context: "Water is essential for all forms of life because"
-  num_beams: 1 # Set to 1 for greedy search
+  num_beams: 5 # Set to 1 for greedy search
   max_new_tokens: 50
   temperature: 1.2
   top_k: 50
@@ -37,5 +37,5 @@ model_configs: # 162M parameter configuration
   emb_dim: 768       # Embedding dimension
   n_heads: 12        # Number of attention heads
   n_layers: 12       # Number of layers
-  drop_rate: 0.1    # Dropout rate
+  drop_rate: 0.3    # Dropout rate
   qkv_bias: false    # Query-key-value bias

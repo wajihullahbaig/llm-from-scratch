@@ -20,13 +20,28 @@
             },
         },
         {
-            "name": "Train-Wikipedia",
+            "name": "Train-Wikipedia-162M",
             "type": "debugpy",
             "request": "launch",
             "program": "training/train_gpt_wiki.py",
             "args": [
                 "--settings",
                 "${workspaceFolder}/configs/gpt2_162m_config.yaml"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "%PYTHONPATH%;${workspaceFolder}"
+            },
+        },
+        {
+            "name": "Train-Wikipedia-133M",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "training/train_gpt_wiki.py",
+            "args": [
+                "--settings",
+                "${workspaceFolder}/configs/gpt2_133m_config.yaml"
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",

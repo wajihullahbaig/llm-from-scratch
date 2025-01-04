@@ -3,13 +3,13 @@
 # Model settings
 model:
   output_dir: outputs
-  save_name: gpt-model-text-2-wiki.pt
+  save_name: gpt-model-wiki-133M.pt
   device: null  # cpu, mps or cuda. If None, will select the best available one
   model_type: GPT_CONFIG_133M  
 
 # Training configuration
 training:
-  test_train_ratio: 0.75  # Test vs Train split ratio
+  test_train_ratio: 0.8  # Test vs Train split ratio
   num_epochs: 20 # Number of epochs (1, since the dataset is already huge)
   batch_size: 12  # Suggested 8 or less for local training, 16/32/64/128 for GPU
   subset_ratio: 0.0025 # Percentage of original dataset to use (e.g., 0.1 = 10%)
@@ -20,7 +20,7 @@ training:
 # Inference settings
 inference:
   start_context: "Water is essential for all forms of life because"
-  num_beams: 1 # Set to 1 for greedy search
+  num_beams: 5 # Set to 1 for greedy search
   max_new_tokens: 50
   temperature: 1.2
   top_k: 50
