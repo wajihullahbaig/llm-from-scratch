@@ -9,7 +9,7 @@ def test_text_generation():
     # Initialize model and tokenizer
     tokenizer = tiktoken.get_encoding("gpt2")
     device = set_device()
-    MODEL_PATH = f"outputs/26122024_120641/GPT_CONFIG_162M/gpt-model-text-2.pt"
+    MODEL_PATH = f"outputs/07012025_171018/GPT_CONFIG_162M/gpt-model-wiki-162M.pt"
     model,config = load_model(MODEL_PATH)
     model.to(device)
 
@@ -52,7 +52,7 @@ def test_text_generation():
 
     # Test Case 3: Beam Search
     print("\n=== Beam Search Testing ===")
-    beam_sizes = [1, 3, 5]
+    beam_sizes = [1, 3, 5,7,9]
     for num_beams in beam_sizes:
         output = generator.generate_text(
             prompt=prompt,
@@ -71,7 +71,7 @@ def test_text_generation():
     output = generator.generate_text(
         prompt=repetitive_prompt,
         max_new_tokens=50,
-        repetition_penalty=1.0
+        repetition_penalty=2.0
     )
     print("\nNo Repetition Penalty:", output)
     
