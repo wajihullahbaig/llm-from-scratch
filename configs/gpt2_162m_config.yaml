@@ -1,41 +1,52 @@
-# GPT Model Configuration File
+# GPT model configuration: GPT-2 small, 12 layers x 768 dims (162M untied, 124M with tied embeddings)
+# Every key is optional; see configs/config.py for defaults. Floats need a decimal point (6.0e-4, not 6e-4).
 
-# Model settings
-model:
+run:
   output_dir: outputs
-  save_name: gpt-model-wiki-162M.pt
-  device: null  # cpu, mps or cuda. If None, will select the best available one
-  model_type: GPT_CONFIG_162M  
+  device: null  # cpu, mps or cuda. If null, the best available one is selected
+  seed: 42
 
-# Training configuration
+data:
+  source: wikipedia  # alice | wikipedia (can be overridden with --data)
+  subset_ratio: 0.001  # Fraction of Wikipedia articles to use (e.g. 0.1 = 10%)
+  val_ratio: 0.2
+  stride: null  # Sliding-window stride for training samples; null = context_length (no overlap)
+
 training:
-  test_train_ratio: 0.8  # Test vs Train split ratio
-  num_epochs: 20 # Number of epochs (1, since the dataset is already huge)
-  batch_size: 16  # Suggested 8 or less for local training, 16/32/64/128 for GPU
-  subset_ratio: 0.001 # Percentage of original dataset to use (e.g., 0.1 = 10%)
-  advanced_training: true  # Enables learning rate warmup, cosine decay and gradient clipping
-  test_before_training: false  # If true, tests model before training (may take time)
-  text_stride: 128 # While creating input/target ids, we create sliding window chunks using strides, should be less than context_length
+  num_epochs: 20
+  batch_size: 8  # Lower it (or raise grad_accum_steps) if you run out of memory
+  grad_accum_steps: 4
+  learning_rate: 6.0e-4  # Peak learning rate after warmup
+  min_lr: 6.0e-5  # Final learning rate of the cosine decay
+  warmup_ratio: 0.05
+  weight_decay: 0.1
+  grad_clip: 1.0
+  precision: auto  # auto picks bf16 (Ampere+), fp16 (older GPUs) or fp32 (CPU / MPS)
+  compile: false  # torch.compile; needs Triton (Linux + CUDA)
+  grad_checkpointing: false  # Saves memory for long contexts at ~20% extra compute
+  eval_interval: 50  # Optimizer steps between evaluations
+  eval_batches: 20
+  early_stopping_patience: 5  # Evaluations without val improvement before stopping (0 = off)
+  sample_interval: 250  # Optimizer steps between generated samples (0 = off)
+  save_interval: 500  # Optimizer steps between resumable last.pt saves (0 = only at the end)
 
-# Inference settings
-inference:
-  start_context: "Water is essential for all forms of life because"
-  num_beams: 5 # Set to 1 for greedy search
+generation:
+  prompt: "Water is essential for all forms of life because"
   max_new_tokens: 25
-  temperature: 1.2
+  temperature: 1.0
   top_k: 50
   top_p: 0.9
-  early_stopping: True
-  no_repeat_ngram_size: 3  
   repetition_penalty: 1.5
-  do_sample: True # Used only when num_beams < 2 
+  no_repeat_ngram_size: 3
+  num_beams: 1  # > 1 uses beam search
+  do_sample: true  # false = greedy decoding
 
-# Model Architecture Configurations
-model_configs: # 162M parameter configuration
-  vocab_size: 50257   # Vocabulary size
-  context_length: 256 # Shortened context length (orig: 1024)
-  emb_dim: 768       # Embedding dimension
-  n_heads: 12        # Number of attention heads
-  n_layers: 12       # Number of layers
-  drop_rate: 0.3    # Dropout rate
-  qkv_bias: false    # Query-key-value bias
+model:
+  vocab_size: 50257
+  context_length: 1024
+  emb_dim: 768
+  n_heads: 12
+  n_layers: 12
+  drop_rate: 0.1
+  qkv_bias: false
+  tie_weights: true

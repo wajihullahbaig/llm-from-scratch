@@ -1,70 +1,37 @@
 # Miscellaneous helper functions
-import re
-import torch
-from importlib.metadata import version
 import logging
+import random
+from typing import Optional
 
-def print_lib_versions(logger:logging.Logger):
-    logger.info(f"{50 * '='}")
-    logger.info("\t\tPACKAGES VERSIONS")
-    logger.info(f"{50 * '='}")
-    pkgs = ["matplotlib", 
-        "numpy", 
-        "tiktoken", 
-        "torch",
-        #"tensorflow" # For OpenAI's pretrained weights
-       ]
-    for p in pkgs:
-        logger.info(f"{p} version: {version(p)}")
+import numpy as np
+import torch
 
-def text_to_token_ids(text, tokenizer):
-    encoded = tokenizer.encode(text, allowed_special={'<|endoftext|>'})
-    encoded_tensor = torch.tensor(encoded).unsqueeze(0) # add batch dimension
-    return encoded_tensor
 
-def token_ids_to_text(token_ids, tokenizer):
-    flat = token_ids.squeeze(0) # remove batch dimension
-    return tokenizer.decode(flat.tolist())
+def setup_logger(name: str, log_file: Optional[str] = None) -> logging.Logger:
+    """Log to the console and, optionally, to a file."""
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    logger.handlers.clear()
+    handlers = [logging.StreamHandler()]
+    if log_file:
+        handlers.append(logging.FileHandler(log_file, encoding="utf-8"))
+    for handler in handlers:
+        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+        logger.addHandler(handler)
+    return logger
 
-# Helper function to get the default device based on availability
-def get_default_device():
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        return torch.device("mps")
-    else:
-        return torch.device("cpu")
 
-def set_device(device_name=None):
-    # The following lines will allow the code to run on Apple Silicon chips, if applicable,
-    # which is approximately 2x faster than on an Apple CPU (as measured on an M3 MacBook Air).
-    # However, the resulting loss values may be slightly different.
+def pick_device(name: Optional[str] = None) -> torch.device:
+    """Return the requested device if available, otherwise the best one (cuda > mps > cpu)."""
+    available = {"cuda": torch.cuda.is_available(), "mps": torch.backends.mps.is_available(), "cpu": True}
+    if name and available.get(name):
+        return torch.device(name)
+    if name:
+        logging.getLogger(__name__).warning("Device %r not available, picking the best available one", name)
+    return torch.device(next(device for device, ok in available.items() if ok))
 
-    if device_name is not None:
-        if device_name == "cuda" and torch.cuda.is_available():
-            device = torch.device("cuda")
-        elif device_name == "mps" and torch.backends.mps.is_available():
-            device = torch.device("mps")
-        elif device_name == "cpu":
-            device = torch.device("cpu")
-        else:
-            print(f"Warning: {device_name} device not available")
-            device = get_default_device()
-    else:
-        device = get_default_device()
-    return device
 
-def clean_text(text: str) -> str:
-    """
-    Clean text by removing special characters and extra whitespace.
-    
-    Args:
-        text (str): Input text
-        
-    Returns:
-        str: Cleaned text
-    """
-    text = re.sub(r'\r\n|\r|\n|\*', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip()
-
+def set_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)  # also seeds all CUDA devices

@@ -24,3 +24,5 @@ alice-wonderland.txt
 
 corpuses/
 outputs/
+# Token caches
+*.npy
